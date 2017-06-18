@@ -1,1 +1,5 @@
 venv/*
+*.png
+chicken/
+chicken_test/
+chicken_train/
