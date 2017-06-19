@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,32 +9,75 @@
         *{
             margin:0;
         }
+
+        .loading{
+            display: none;
+        }
+
+        .loader {
+            border: 16px solid #f3f3f3; /* Light grey */
+            border-top: 16px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            animation: spin 2s linear infinite;
+            position:absolute;
+            left:45.5%;
+            top:29%;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
-<body onload="InitThis();">
-    <nav style="width:100%; height:100px; text-align: center;">
-        <h3 style="margin-top:50px;">Pix to Pix Chicken version</h3>
+<!-- 그림 그리는 부분 -->
+{#<body onload="InitThis();">#}
+<body>
+    <div class="loading" style="background: black; opacity: 0.5; width:100%; height:100%; position:absolute;"></div>
+    <nav style="width:100%; height:100px; text-align: center; padding-top:50px;">
+        <h3>Pix to Pix Chicken version</h3>
     </nav>
     <br/>
+    <div class="loader loading"></div>
+    <div>
+        <div align="center">
+            <form id="test_input_form" action="/" method="post" enctype="multipart/form-data">{% csrf_token %}
+                <input type="file" name="test_image" multiple id="fileToUpload">
+                <input type="submit" value="Upload & Process" name="submit">
+            </form>
+        </div>
+    </div>
     <br/>
     <div class="input_div_wrapper" style="text-align: center; width:25%; margin-left:23%; display: inline-block; vertical-align: middle;">
         <h3>Input</h3>
-        <canvas id="myCanvas" width="256" height="256" style="border:2px solid black; background-color: white;"></canvas>
+        {% if flag is 0 %}
+            <div style="border:2px solid black; width:256px; height:256px; margin:auto;"><img id="input_img" alt=""></div>
+        {% else %}
+            <div style="border:2px solid black; width:256px; height:256px; margin:auto;"><img src="{% static 'img/temp.png' %}" id="input_img" alt=""></div>
+        {% endif %}
+
     </div>
 
     <div class="process_warpper" style="display: inline-block; width:5%; border:1px solid black; text-align: center;">
         <div class="button_wrapper">
             pix_2_pix
-            <button id="process_btn" type="button">process</button>
+            processing
+{#            <button id="process_btn" type="button">process</button>#}
         </div>
     </div>
 
     <div class="output_div_wrapper" style="text-align: center; width:25%; display: inline-block; vertical-align: middle;">
         <h3>output</h3>
-{#        <div id="output_div" style="width:256px; height:256px; border:2px solid black; margin:auto;"></div>#}
-        <canvas id="myCanvas2" width="256" height="256" style="border:2px solid black"></canvas>
+        {% if flag is 0 %}
+            <div style="border:2px solid black; width:256px; height:256px; margin:auto;"><img id="output_img" alt=""></div>
+        {% else %}
+            <div style="border:2px solid black; width:256px; height:256px; margin:auto;"><img src="{% static 'output/images/test-outputs.png' %}" id="output_img" alt=""></div>
+        {% endif %}
     </div>
 
+    <!-- 그림그리는 부분
     <br /><br />
     <div style="text-align: center">
         <button onclick="javascript:clearArea();return false;">Clear Area</button>
@@ -55,9 +99,10 @@
             <option value="gray">gray</option>
         </select>
     </div>
-
+    -->
       <!-- script part -->
     <script type="text/javascript" >
+        /* 여기는 그림그려서 하는 부분
         var mousePressed = false;
         var lastX, lastY;
         var ctx;
@@ -122,12 +167,44 @@
                 }
                 }).done(function(msg){
 {#                    alert('success');#}
+                    console.log(msg);
                     var canvas = document.getElementById('myCanvas2');
                     var context = canvas.getContext('2d');
                     context.drawImage(img, 0, 0);
 {#                    document.body.appendChild(img);#}
 {#                    ctx.drawImage(img, 0, 0);#}
             });
+        });*/
+        $("#fileToUpload").click(function(){
+            $('#input_img').attr('src', "");
+            $('#input_img').empty();
+            $('#output_img').attr('src', "");
+            $('#output_img').empty();
+        });
+
+        $("#fileToUpload").change(function(){
+            readURL(this);
+        });
+        function readURL(input) {
+            var url = input.value;
+            var ext = url.substring(url.lastIndexOf('.') + 1).toLowerCase();
+            if (input.files && input.files[0]&& (ext == "gif" || ext == "png" || ext == "jpeg" || ext == "jpg")) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    $('#input_img').attr('src', e.target.result);
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }else{
+                alert('plz upload chicken image ');
+                 $('.imagepreview').attr('src', '/assets/no_preview.png');
+            }
+        }
+
+        // show loading bar part
+        $('#test_input_form').on('submit', function(){
+           $('.loading').show();
         });
     </script>
 </body>

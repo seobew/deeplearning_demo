@@ -740,9 +740,9 @@ def main():
                 filesets = save_images(results)
                 for i, f in enumerate(filesets):
                     print("evaluated image", f["name"])
-                index_path = append_index(filesets)
+                # index_path = append_index(filesets)
 
-            print("wrote index at", index_path)
+            # print("wrote index at", index_path)
         else:
             # training
             start = time.time()
